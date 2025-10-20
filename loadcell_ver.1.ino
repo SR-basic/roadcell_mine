@@ -1,25 +1,19 @@
-#include "HX711.h"
-#define calibration_factor -1080    //캘리브레이션 값 (음수값이 나올 수 있음)
-                                    // 절대값 기준으로 원래 무게보다 더 나가면 값을 추가
-                                    // 절대값 기준으로 원래 무게보다 덜 나가면 값을 감소
+void loadcell_ver1(){
+  int value;
 
-const int DOUT_PIN = 2;
-const int SCK_PIN = 3;
+  scale.set_scale(calibration_factor);
+  scale.tare(); //영점잡기. 현재 측정값을 0으로 둔다.
 
-HX711 scale;
-
-int value;
-
-void setup() {
-    Serial.begin(9600);  
-    scale.begin(DOUT_PIN,SCK_PIN);
-    scale.set_scale(calibration_factor);
-    scale.tare(); //영점잡기. 현재 측정값을 0으로 둔다.
-}
-void loop() {
+  while(1) {
     value = (int)scale.get_units(10);
+    if (value < -5){
+      value = abs(value);
+    }
     Serial.print(value);
     Serial.println(" g");
 
     delay(2000);
+      
+    if (value >= 25) break;   // 25g 넘으면 쓰레기통 닫겠습니다. (+미구연 쓰레기통이 10초 넘게 열려있으면)
+  }
 }
